@@ -1,6 +1,6 @@
 """
 This module implements a Graph class, and a GraphFactory class,
-which can construct a few types of standard graphs.
+which can construct a few types of classic graphs.
 
 This was done mostly as a way to try my hand at OOP.
 
@@ -8,32 +8,50 @@ The goal being to write a Graph object that hides the implementation.
 In this case, the implementation of the graph structure being a
 dictionary of nodes.
 
+Eventually the module will implement most of the concepts covered in Udacity's 
+Intro to Algorithms (CS215) online course.
+
 me@jeromebchouinard.ca
 """
-class Graph:
+import sys
 
+class Graph:
+    """This class represents a graph of labeled, attribute-less nodes
+    and has two categories of methods: methods to modify the graph,
+    and methods to get useful properties of the graph.
+
+        ---Get methods
+            getLinkCount
+            getNodeCound
+            getGraphAsDict
+            getDistToNode
+            getConnectivityCoefficient
+
+        ---Graph methods
+            makeNode
+            makeLink"""
     def __init__(self):
         self.__g = {}
 
-    def getGraphAsDict(self):
+    def getAsDict(self):
         "Returns a dictionary representation of the graph structure."
         return self.__g
 
     def getLinkCount(self):
         "Returns the number of links (edges) in the graph."
-        return sum([sum(self.__g[n].values()) for n in self.__g]) / 2
+        return int(sum([sum(self.__g[n].values()) for n in self.__g]) / 2)
 
     def getNodeCount(self):
         "Returns number of nodes (vertices) in the graph."
-        return sum(self.__g.values())
+        return len(self.__g)
 
-    def makeNode(self, n):
-        "Create a new (unconnected) node in graph."
+    def addNode(self, n):
+        "Create a new (unconnected) node in the graph."
         if n not in self.__g:
             self.__g[n] = {}
         return 1
 
-    def makeLink(self, n1, n2):
+    def addLink(self, n1, n2):
         """Make a link between nodes n1 and n2. n1 and n2 are
         created if they did not already exist."""
         if (not self.makeNode(n1)):
@@ -46,7 +64,7 @@ class Graph:
     
     def getDistToNode(self, n):
         """Returns a dictionary of the distance (shortest path) between
-        node n and every other reachable node in the graph."""
+        node n and every reachable node (from n) in the graph."""
         currentDistance = 0
         shortestPaths = {n:0}
         currentlyVisiting = [n]
@@ -54,8 +72,12 @@ class Graph:
         def findNewNeighbors(nodes):
             newNeighbors = []
             for n in nodes:
-                if self.__g[n] not in shortestPaths:
-                    newNeighbors.append(self.__g[n])
+                try:
+                    for nb in self.__g[n]:
+                        if nb not in shortestPaths:
+                            newNeighbors.append(nb)
+                except KeyError:
+                    raise ValueError('Node ' + str(n) + ' does not exist.')
             return newNeighbors
 
         while (currentlyVisiting != []):
@@ -69,12 +91,6 @@ class Graph:
 
         return shortestPaths
 
-    def getAverageDistToNodes(self, n):
-        """Returns the average distance (shortest path) between n
-        and all other reachable nodes"""
-        dists = self.getDistToNode(n)
-        return sum(dists)/len(dists)
-
     def getConnectivityCoefficient(self, n):
         """Returns connectivity coefficient (cc) of node n.
 
@@ -85,7 +101,10 @@ class Graph:
         nv = number of links between neighbors of n
 
         """
-        neighbors = [i for i in self.__g[n]]
+        try:
+            neighbors = [i for i in self.__g[n]]
+        except KeyError:
+            raise ValueError('Node ' +str(n) + ' does not exist.')
         nv = 0
         for n1 in neighbors:
             for n2 in neighbors[neighbors.index(n1)+1:]:
@@ -95,6 +114,10 @@ class Graph:
 
         if kv > 1: return 2.0 * nv / (kv * (kv-1))
         else: return 0
+
+    def findBridgeLinks(self):
+        bridgeLinks = {}
+        return bridgeLinks
 
                 
 class GraphFactory():
@@ -139,6 +162,16 @@ class GraphFactory():
 
         Changing default graph type (misleading var name is misleading):
          randomGraphMaker.setDefaults(gType = 'clique')
+
+        Size of hypercube is rounded down to nearest power of 2
+         hyperMaker = GraphFactory(gType = 'hypercube', size = 64)
+         graph = hyperMaker.constructGraph()
+         graph.getNodeCount() 
+            64
+
+         graph = hyperMaker.constructGraph(size = 100)
+         graph.getNodeCount()
+            64
     """
     __validSettings = [ 'gType', 'size', 'p' ]
 
@@ -152,33 +185,58 @@ class GraphFactory():
     def __checkSetting(self, name, value):
         if name == 'gType':
             if value in self.__validGTypes: return 1
-            else: raise ValueError
+            else: raise ValueError('invalid gType value')
 
         elif name == 'size':
-            if type(value) is not int: raise TypeError
+            if type(value) is not int: raise TypeError('size must be an int')
             else: return 1
 
         elif name == 'p':
-            if not 0 < value < 1: raise ValueError
+            if not 0 < value < 1: raise ValueError('invalid p value')
             else: return 1
             
-        else: raise NameError
+        else: raise ValueError('Setting', name, 'does not exist.')
 
-    # TODO
     def constructGraph(self, **kwargs):
+        """This method constructs a Graph object of the type and
+        size specified by the Factory settings (all defaults can
+        be overriden by keyword arguments.
+
+        See help(GraphFactory) for usage examples.
+        """
         for kw in kwargs:
-            if kw not in self.__validSettings:
-                raise NameError
+            self.__checkSetting(kw, kwargs[kw])
+
+        args = {}
+
+        for setting in self.__validSettings:
+            if setting in kwargs:
+                args[setting] = kwargs[setting]
+            else:
+                args[setting] = self.__defaults[setting]
+
+
+        if args['gType'] == 'star': return self.__makeStarGraph(args['size'])
+        elif args['gType'] == 'clique': return self.__makeCliqueGraph(args['size'])
+        elif args['gType'] == 'random': return self.__makeRandomGraph(args['size'], args['p'])
+        elif args['gType'] == 'hypercube': return self.__makeHypercubeGraph(args['size'])
+        elif args['gType'] == 'ring': return self.__makeRingGraph(args['size'])
+        elif args['gType'] == 'chain': return self.__makeChainGraph(args['size'])
+
+        return -1
 
     def setDefaults(self, **kwargs):
+        """Change settings of default graph produced by constructGraph.
+
+        Usage: graphFactoryInstance.setDefaults(setting = value, setting = value...)"""
         for kw in kwargs:
-        try :
-            if(self.__checkSetting(kw, kwargs[kw])):
-                self.__defaults[kw] = kwargs[kw]
-                return 1
-         except NameError:
-            print('Valid settings are: ', self.__validSettings)
-            return 0
+            try:
+                if(self.__checkSetting(kw, kwargs[kw])):
+                    self.__defaults[kw] = kwargs[kw]
+                    return 1
+            except NameError:
+                print('Valid settings are: ', self.__validSettings)
+                return 0
 
     @staticmethod
     def __makeStarGraph(size):
@@ -216,3 +274,12 @@ class GraphFactory():
             for j in range(i+1, size):
                 g.makeLink(i, j)
         return g
+
+    #TODO
+    @staticmethod
+    def __makeHypercubeGraph(size):
+        return Graph()
+
+    @staticmethod
+    def __makeGridGraph(size):
+        return Graph()
