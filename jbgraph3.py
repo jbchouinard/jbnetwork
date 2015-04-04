@@ -14,22 +14,29 @@ Intro to Algorithms (CS215) online course.
 me@jeromebchouinard.ca
 """
 import sys
+import random
 
 class Graph:
     """This class represents a graph of labeled, attribute-less nodes
-    and has two categories of methods: methods to modify the graph,
-    and methods to get useful properties of the graph.
+    and has three categories of methods: methods to modify the graph,
+    get methods to access attributes, and methods (algorithms) to compute 
+    interesting properties of the graph.
 
         ---Get methods
             getLinkCount
-            getNodeCound
+            getNodeCount
             getGraphAsDict
-            getDistToNode
-            getConnectivityCoefficient
 
-        ---Graph methods
-            makeNode
-            makeLink"""
+        ---Graph modification methods
+            addNode
+            addLink
+
+        ---Graph algorithms
+            findDistanceToNode
+            findNeighbors
+            computeConnectivityCoefficient
+            createRSTree"""
+
     def __init__(self):
         self.__g = {}
 
