@@ -122,6 +122,15 @@ class Graph:
         if kv > 1: return 2.0 * nv / (kv * (kv-1))
         else: return 0
 
+    def findNeighbors(self, n):
+        "Returns list of neighbors of node n."
+        try:
+            neighbors = [nb for nb in self.__g[n]]
+        except KeyError:
+            neighbors = []
+        return neighbors
+
+
     def findBridgeLinks(self):
         bridgeLinks = {}
         return bridgeLinks
