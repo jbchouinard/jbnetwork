@@ -131,9 +131,69 @@ class Graph:
         return neighbors
 
 
+class RSTree():
+    """ For creation and study of rooted spanning trees.
+
+    Must be created from a Graph object and cannot be modified. """
+
+    def __init__(self, G, root):
+        S = {}
+        marked = []
+        openList = [root]
+
+        def addLink(n1, n2, link):
+            if not n1 in S:
+                S[n1] = {}
+            if not n2 in S:
+                S[n2] = {}
+            S[n1][n2] = link
+            S[n2][n1] = link
+
+        while (openList != []):
+            current = openList.pop()
+            neighbors = g.findNeighbors(current)
+
+            for nb in neighbors:
+                if nb not in marked:
+                    marked.append(nb)
+                    openList.append(nb)
+                    addLink(current, nb, 'green')
+
+                elif nb not in S[current]:
+                    addLink(current, nb, 'red')
+
+        self.__S = S
+        return 1
+
+    def post_order(S, root):
+        # return mapping between nodes of S and the post-order value
+        # of that node
+        pass
+
+    def number_of_descendants(S, root):
+        # return mapping between nodes of S and the number of descendants
+        # of that node
+        pass
+
+    def lowest_post_order(S, root, po):
+        # return a mapping of the nodes in S
+        # to the lowest post order value
+        # below that node
+        # (and you're allowed to follow 1 red edge)
+        pass
+
+    def highest_post_order(S, root, po):
+        # return a mapping of the nodes in S
+        # to the highest post order value
+        # below that node
+        # (and you're allowed to follow 1 red edge)
+        pass
+
     def findBridgeLinks(self):
-        bridgeLinks = {}
-        return bridgeLinks
+        # use the four functions above
+        # and then determine which edges in G are bridge edges
+        # return them as a list of tuples ie: [(n1, n2), (n4, n5)]
+        pass
 
                 
 class GraphFactory():
