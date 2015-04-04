@@ -309,29 +309,31 @@ class GraphFactory():
             try:
                 if(self.__checkSetting(kw, kwargs[kw])):
                     self.__defaults[kw] = kwargs[kw]
-                    return 1
             except NameError:
                 print('Valid settings are: ', self.__validSettings)
                 return 0
+        return 1
 
     @staticmethod
     def __makeStarGraph(size):
         g = Graph()
         for i in range(1, size):
-            g.makeLink(0, i)
+            g.addLink(0, i)
         return g
 
     @staticmethod
     def __makeChainGraph(size):
         g = Graph()
         for i in range(size-1):
-            g.makeLink(i, i+1)
+            g.addLink(i, i+1)
         return g
 
     @staticmethod
     def __makeRingGraph(size):
-        g = self.__makeChainGraph(size)
-        g.makeLink(0, size)
+        g = Graph()
+        for i in range(size-1):
+            g.addLink(i, i+1)
+        g.addLink(0, size)
         return g
 
     @staticmethod
@@ -340,7 +342,7 @@ class GraphFactory():
         for i in range(size-1):
             for j in range(i+1, size):
                 if random.random() < p:
-                    g.makeLink(i, j)
+                    g.addLink(i, j)
         return g
 
     @staticmethod
@@ -348,7 +350,7 @@ class GraphFactory():
         g = Graph()
         for i in range(size-1):
             for j in range(i+1, size):
-                g.makeLink(i, j)
+                g.addLink(i, j)
         return g
 
     #TODO
