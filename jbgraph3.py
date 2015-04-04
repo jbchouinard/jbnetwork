@@ -61,15 +61,15 @@ class Graph:
     def addLink(self, n1, n2):
         """Make a link between nodes n1 and n2. n1 and n2 are
         created if they did not already exist."""
-        if (not self.makeNode(n1)):
+        if (not self.addNode(n1)):
             return -1
-        if (not self.makeNode(n2)):
+        if (not self.addNode(n2)):
             return -1
         self.__g[n1][n2] = 1
         self.__g[n2][n1] = 1
         return 1
     
-    def getDistToNode(self, n):
+    def findDistToNode(self, n):
         """Returns a dictionary of the distance (shortest path) between
         node n and every reachable node (from n) in the graph."""
         currentDistance = 0
@@ -98,7 +98,7 @@ class Graph:
 
         return shortestPaths
 
-    def getConnectivityCoefficient(self, n):
+    def computeConnectivityCoefficient(self, n):
         """Returns connectivity coefficient (cc) of node n.
 
         cc = 2 * nv / kv(kv-1)
