@@ -243,15 +243,16 @@ class GraphFactory():
             64
 
     """
-    __validSettings = [ 'gType', 'size', 'p' ]
+    __validSettings = [ 'gtype', 'size', 'p', 'sizeX', 'sizeY' ]
 
-    __validGTypes = [ 'star', 'clique', 'random', 'ring', 'chain' ]
+    __validGTypes = [ 'star', 'clique', 'random', 'ring', 'chain', 'grid', 'hypercube' ]
     
-    def __init__(self, size = None, gType = None, p = None):
-        self.__defaults = { 'gType': gType,
+    def __init__(self, size = None, gtype = None, p = None, sizeX = None, sizeY = None):
+        self.__defaults = { 'gtype': gtype,
                             'size': size,
-                            'p': p }
-
+                            'p': p,
+                            'sizeX': sizeX,
+                            'sizeY': sizeY }
 
     def constructGraph(self, **kwargs):
         """This method constructs a Graph object of the type and
@@ -268,15 +269,15 @@ class GraphFactory():
             else:
                 args[setting] = self.__defaults[setting]
 
-
-        if args['gType'] == 'star': return self.__makeStarGraph(args['size'])
-        elif args['gType'] == 'clique': return self.__makeCliqueGraph(args['size'])
-        elif args['gType'] == 'random': return self.__makeRandomGraph(args['size'], args['p'])
-        elif args['gType'] == 'hypercube': return self.__makeHypercubeGraph(args['size'])
-        elif args['gType'] == 'ring': return self.__makeRingGraph(args['size'])
-        elif args['gType'] == 'chain': return self.__makeChainGraph(args['size'])
-
-        return -1
+        if args['gtype'] == 'star': return self.__makeStarGraph(args['size'])
+        elif args['gtype'] == 'clique': return self.__makeCliqueGraph(args['size'])
+        elif args['gtype'] == 'random': return self.__makeRandomGraph(args['size'], args['p'])
+        elif args['gtype'] == 'hypercube': return self.__makeHypercubeGraph(args['size'])
+        elif args['gtype'] == 'ring': return self.__makeRingGraph(args['size'])
+        elif args['gtype'] == 'chain': return self.__makeChainGraph(args['size'])
+        elif args['gtype'] == 'grid': return self.__makeGridGraph(args['sizeX'], args['sizeY'])
+        
+        raise ValueError('Invalid graph type.')
 
     def setDefaults(self, **kwargs):
         """Change settings of default graph produced by constructGraph.
