@@ -219,10 +219,11 @@ class GraphFactory():
         chain
         ring
         hypercube
-        random
+        grid
+        random (Erdos-Renyi)
 
         ---Usage
-        starGraphMaker = GraphFactory(gType = 'star', size = 10)
+        starGraphMaker = GraphFactory(gtype = 'star', size = 10)
 
         Make a star graph with 10 nodes:
          starGraphMaker.constructGraph()
@@ -230,30 +231,17 @@ class GraphFactory():
         Make a star graph with 20 nodes:
          starGraphMaker.constructGraph(size = 20)
 
-        randomGraphMaker = GraphFactory(gType = 'random', size = 100, p = 0.3)
-
-        Make a random graph with p = 0.3, 100 nodes
-        (each pair of nodes has 30% of being linked)
-          randomGraphMaker.constructGraph()
+        randomGraphMaker = GraphFactory(gtype = 'random', size = 100, p = 0.3)
 
         Change defaults:
          randomGraphMaker.setDefaults(size = 200, p = 0.5)
 
-        Make a randomgraph with 200 nodes, p = 0.5
-         randomGraphMaker.constructGraph()
-
-        Changing default graph type (misleading var name is misleading):
-         randomGraphMaker.setDefaults(gType = 'clique')
-
         Size of hypercube is rounded down to nearest power of 2
-         hyperMaker = GraphFactory(gType = 'hypercube', size = 64)
+         hyperMaker = GraphFactory(gtype = 'hypercube', size = 64)
          graph = hyperMaker.constructGraph()
          graph.getNodeCount() 
             64
 
-         graph = hyperMaker.constructGraph(size = 100)
-         graph.getNodeCount()
-            64
     """
     __validSettings = [ 'gType', 'size', 'p' ]
 
