@@ -143,8 +143,8 @@ class RSTree():
     Must be created from a Graph object and cannot be modified. """
 
     def __init__(self, G, root):
-        S = {}
-        marked = []
+        S = {root:{}}
+        marked = [root]
         openList = [root]
 
         def addLink(n1, n2, link):
@@ -156,20 +156,20 @@ class RSTree():
             S[n2][n1] = link
 
         while (openList != []):
-            current = openList.pop()
-            neighbors = g.findNeighbors(current)
+            current = openList.pop(0)
+            neighbors = G.findNeighbors(current)
 
             for nb in neighbors:
                 if nb not in marked:
                     marked.append(nb)
                     openList.append(nb)
                     addLink(current, nb, 'green')
-
                 elif nb not in S[current]:
                     addLink(current, nb, 'red')
-
         self.__S = S
-        return 1
+
+    def asDict(self):
+        return self.__S
 
     def post_order(S, root):
         # return mapping between nodes of S and the post-order value
