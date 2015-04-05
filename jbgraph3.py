@@ -305,7 +305,7 @@ class GraphFactory():
         g = Graph()
         for i in range(size-1):
             g.addLink(i, i+1)
-        g.addLink(0, size)
+        g.addLink(0, size-1)
         return g
 
     @staticmethod
