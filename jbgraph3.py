@@ -252,20 +252,6 @@ class GraphFactory():
                             'size': size,
                             'p': p }
 
-    def __checkSetting(self, name, value):
-        if name == 'gType':
-            if value in self.__validGTypes: return 1
-            else: raise ValueError('invalid gType value')
-
-        elif name == 'size':
-            if type(value) is not int: raise TypeError('size must be an int')
-            else: return 1
-
-        elif name == 'p':
-            if not 0 < value < 1: raise ValueError('invalid p value')
-            else: return 1
-            
-        else: raise ValueError('Setting', name, 'does not exist.')
 
     def constructGraph(self, **kwargs):
         """This method constructs a Graph object of the type and
@@ -274,9 +260,6 @@ class GraphFactory():
 
         See help(GraphFactory) for usage examples.
         """
-        for kw in kwargs:
-            self.__checkSetting(kw, kwargs[kw])
-
         args = {}
 
         for setting in self.__validSettings:
@@ -300,13 +283,8 @@ class GraphFactory():
 
         Usage: graphFactoryInstance.setDefaults(setting = value, setting = value...)"""
         for kw in kwargs:
-            try:
-                if(self.__checkSetting(kw, kwargs[kw])):
-                    self.__defaults[kw] = kwargs[kw]
-            except NameError:
-                print('Valid settings are: ', self.__validSettings)
-                return 0
-        return 1
+            if kw in self.__validSettings:
+                self.__defaults[kw] = kwargs[kw]
 
     @staticmethod
     def __makeStarGraph(size):
