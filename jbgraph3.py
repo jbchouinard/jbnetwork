@@ -25,7 +25,7 @@ class Graph:
         ---Get methods
             getLinkCount
             getNodeCount
-            getGraphAsDict
+            asDict
 
         ---Graph modification methods
             addNode
@@ -34,13 +34,15 @@ class Graph:
         ---Graph algorithms
             findDistanceToNode
             findNeighbors
-            computeConnectivityCoefficient
-            createRSTree"""
+            computeConnectivityCoefficient"""
 
-    def __init__(self):
-        self.__g = {}
+    def __init__(self, fromDict = None):
+        if fromDict is None:
+            self.__g = {}
+        else:
+            self.__g = fromDict
 
-    def getAsDict(self):
+    def asDict(self):
         "Returns a dictionary representation of the graph structure."
         return self.__g
 
@@ -51,6 +53,10 @@ class Graph:
     def getNodeCount(self):
         "Returns number of nodes (vertices) in the graph."
         return len(self.__g)
+
+    def listNodes(self):
+        "Returns a list of all nodes"
+        return [n for n in g]
 
     def addNode(self, n):
         "Create a new (unconnected) node in the graph."
