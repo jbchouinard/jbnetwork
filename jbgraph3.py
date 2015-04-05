@@ -325,11 +325,40 @@ class GraphFactory():
                 g.addLink(i, j)
         return g
 
-    #TODO
     @staticmethod
     def __makeHypercubeGraph(size):
-        return Graph()
+        def recMakeHG(n):
+            if n == 1:
+                return {0:{}}
+
+            m = int(n/2)
+            g = {}
+            g1 = recMakeHG(m)
+
+            for node1 in g1:
+                g[node1] = g1[node1]
+                g[node1 + m] = {}
+                for node2 in g1[node1]:
+                    g[node1 + m][node2 + m] = 1
+
+                g[node1][node1 + m] = 1
+                g[node1 + m][node1] = 1
+            return g
+
+        n = 1
+        while(n <= size):
+            n = n*2
+        n = n/2
+
+        g = recMakeHG(n)
+        return Graph(fromDict = g)
 
     @staticmethod
-    def __makeGridGraph(size):
-        return Graph()
+    def __makeGridGraph(sizeX, sizeY):
+        g = Graph()
+        for n in range(sizeX * sizeY):
+            if ((n+1) % sizeX != 0):
+                g.addLink(n, n+1)
+            if (n < (sizeY - 1)*sizeX):
+                g.addLink(n, n+sizeX)
+        return g
