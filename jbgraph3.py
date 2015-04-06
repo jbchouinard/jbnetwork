@@ -399,6 +399,8 @@ class GraphFactory():
     @staticmethod
     def __makeRandomGraph(size, p):
         g = Graph()
+        for i in range(size):
+            g.addNode(i)
         for i in range(size-1):
             for j in range(i+1, size):
                 if random.random() < p:
@@ -433,6 +435,7 @@ class GraphFactory():
                 g[node1 + m][node1] = 1
             return g
 
+        # Find largest power of 2 < size
         n = 1
         while(n <= size):
             n = n*2
