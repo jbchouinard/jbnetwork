@@ -82,6 +82,8 @@ class Graph:
         shortestPaths = {n:0}
         currentlyVisiting = [n]
 
+        # TODO: this function is super slow
+        # Pretty sure there is a faster way to do this
         def findNewNeighbors(nodes):
             newNeighbors = []
             for n in nodes:
@@ -136,24 +138,39 @@ class Graph:
             neighbors = []
         return neighbors
 
+    def findBridgeLinks(self, root):
+        s = RSTree(self.__g, root)
+        return s.findBridgeLinks()
 
-class RSTree():
+
+class RSTree:
     """ For creation and study of rooted spanning trees.
 
-    Must be created from a Graph object and cannot be modified. """
+    Must be created from a Graph object and cannot be modified. 
+
+    Directed tree edges are labeled 'green'; non-directed non-tree
+    edges are labeled 'red'."""
 
     def __init__(self, G, root):
+        self.__root = root
         S = {root:{}}
         marked = [root]
         openList = [root]
 
-        def addLink(n1, n2, link):
+        def addGreenLink(n1, n2):
             if not n1 in S:
                 S[n1] = {}
             if not n2 in S:
                 S[n2] = {}
-            S[n1][n2] = link
-            S[n2][n1] = link
+            S[n1][n2] = 'green'
+
+        def addRedLink(n1, n2):
+            if not n1 in S:
+                S[n1] = {}
+            if not n2 in S:
+                S[n2] = {}
+            S[n1][n2] = 'red'
+            S[n2][n1] = 'red'
 
         while (openList != []):
             current = openList.pop(0)
@@ -163,43 +180,113 @@ class RSTree():
                 if nb not in marked:
                     marked.append(nb)
                     openList.append(nb)
-                    addLink(current, nb, 'green')
-                elif nb not in S[current]:
-                    addLink(current, nb, 'red')
+                    addGreenLink(current, nb)
+                elif nb not in S[current] and current not in S[nb]:
+                    addRedLink(current, nb)
         self.__S = S
 
     def asDict(self):
         return self.__S
 
-    def post_order(S, root):
-        # return mapping between nodes of S and the post-order value
-        # of that node
-        pass
+    def postOrder(self):
+        '''Returns mapping of node to rank in post-order traversal.'''
+        POMap = {}
 
-    def number_of_descendants(S, root):
-        # return mapping between nodes of S and the number of descendants
-        # of that node
-        pass
+        def recPostOrder(current, n):
+            # visit childen from left to right
+            # children are green-linked nodes that are not the parent
+            linked = self.__S[current]
+            children = [n for n in linked if linked[n] == 'green']
+            for child in children:
+                n = recPostOrder(child, n)
+            POMap[current] = n
+            return n+1
 
-    def lowest_post_order(S, root, po):
-        # return a mapping of the nodes in S
-        # to the lowest post order value
-        # below that node
-        # (and you're allowed to follow 1 red edge)
-        pass
+        recPostOrder(self.__root, 1)
+        self.__POMap = POMap
+        return POMap
 
-    def highest_post_order(S, root, po):
-        # return a mapping of the nodes in S
-        # to the highest post order value
-        # below that node
-        # (and you're allowed to follow 1 red edge)
-        pass
+    def numberOfDescendants(self):
+        "Return mapping of node to number of descendants (including itself)"
+        descMap = {}
+
+        def howManyAreYouBelow(current):
+            linked = self.__S[current]
+            children = [n for n in linked if linked[n] == 'green']
+
+            n = 1
+            for child in children:
+                n = n + howManyAreYouBelow(child)
+            descMap[current] = n
+            return n
+
+        howManyAreYouBelow(self.__root)
+        self.__descMap = descMap
+        return descMap
+
+    def lowestPostOrder(self):
+        """Returns mapping of node to the lowest post-order value below it
+        (including itself; and one none-tree (red) edge can be traversed."""
+        lowPOMap = {}
+
+        def whatIsTheLowestPOBelow(current,redTraversed):
+            links = self.__S[current]
+            children = [n for n in self.__S[current]]
+            lowestPO = self.__POMap[current]
+
+            for child in children:
+                if links[child] == 'green':
+                    lowestPO = min(lowestPO, whatIsTheLowestPOBelow(child, redTraversed))
+                elif links[child] == 'red' and redTraversed == 0:
+                    lowestPO = min(lowestPO, whatIsTheLowestPOBelow(child, 1))
+
+            lowPOMap[current] = lowestPO
+            return lowestPO
+
+        whatIsTheLowestPOBelow(self.__root, 0)
+        self.__lowPOMap = lowPOMap
+        return lowPOMap
+
+    def highestPostOrder(self):
+        """Returns mapping of node to the lowest post-order value below it,
+        including itself; and one none-tree (red) edge can be traversed."""
+        highPOMap = {}
+
+        def whatIsTheHighestPOBelow(current,redTraversed):
+            linked = self.__S[current]
+            children = [n for n in linked]
+
+            highestPO = self.__POMap[current]
+
+            for child in children:
+                if linked[child] == 'green':
+                    highestPO = max(highestPO, whatIsTheHighestPOBelow(child,redTraversed))
+                elif linked[child] == 'red' and redTraversed == 0:
+                    highestPO = max(highestPO, whatIsTheHighestPOBelow(child, 1))
+
+            highPOMap[current] = highestPO
+            return highestPO
+
+        whatIsTheHighestPOBelow(self.__root, 0)
+        self.__highPOMap = highPOMap
+        return highPOMap
 
     def findBridgeLinks(self):
-        # use the four functions above
-        # and then determine which edges in G are bridge edges
-        # return them as a list of tuples ie: [(n1, n2), (n4, n5)]
-        pass
+        """Returns bridge links in the graph as list of links"""
+        if not hasattr(self, __POMap):
+            self.postOrder()
+        if not hasattr(self, __descMap):
+            self.numberOfDescendants()
+        if not hasattr(self, __lowPOMap):
+            self.lowestPostOrder()
+        if not hasattr(self, __highPOMap):
+            self.highestPostOrder()
+
+        bridgeLinks = []
+
+        
+
+        return brigdeLinks
 
                 
 class GraphFactory():
