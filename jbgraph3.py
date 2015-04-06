@@ -453,3 +453,39 @@ class GraphFactory():
             if (n < (sizeY - 1)*sizeX):
                 g.addLink(n, n+sizeX)
         return g
+
+
+def test_PO():
+    g = GraphFactory().constructGraph(gtype='ring', size=10)
+    s = RSTree(g, 0)
+    pomap = s.postOrder(0)
+    ndmap = s.numberOfDescendants(0)
+    lopomap = s.lowestPostOrder(0, pomap)
+    hipomap = s.highestPostOrder(0, pomap)
+
+
+def test_GF():
+    sizeXs = [4, 8, 16, 32, 64, 128]
+    sizeYs = sizeXs
+    sizes = [n*n for n in sizeXs]
+    ps = [0, 0.5, 1]
+    gtypes = [ 'random', 'star' , 'clique', 'ring', 'chain', 'grid', 'hypercube' ]
+
+    lens = []
+
+    for gtype in gtypes:
+        for i in range(len(sizes)):
+            g = GraphFactory().constructGraph(gtype = gtype, 
+                                            size = sizes[i],
+                                            sizeX = sizeXs[i],
+                                            sizeY = sizeYs[i],
+                                            p = ps[i])
+            
+
+            #g.findDistToNode(0)
+            g.computeConnectivityCoefficient(0)
+            g.findNeighbors(0)
+
+            lens.append((sizes[i], len(g.asDict())))
+
+    return lens
