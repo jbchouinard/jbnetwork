@@ -17,24 +17,21 @@ import sys
 import random
 
 class Graph:
-    """This class represents a graph of labeled, attribute-less nodes
-    and has three categories of methods: methods to modify the graph,
-    get methods to access attributes, and methods (algorithms) to compute 
-    interesting properties of the graph.
+    """This class represents a graph of labeled, attribute-less node
 
         ---Get methods
             getLinkCount
             getNodeCount
-            asDict
+            getAsDict
+            getDistToNode
+            getNeighbors
+            getCC
+            getNodes
 
         ---Graph modification methods
             addNode
             addLink
-
-        ---Graph algorithms
-            findDistanceToNode
-            findNeighbors
-            computeConnectivityCoefficient"""
+            """
 
     def __init__(self, fromDict = None):
         if fromDict is None:
@@ -42,7 +39,7 @@ class Graph:
         else:
             self.__g = fromDict
 
-    def asDict(self):
+    def getAsDict(self):
         "Returns a dictionary representation of the graph structure."
         return self.__g
 
@@ -54,7 +51,7 @@ class Graph:
         "Returns number of nodes (vertices) in the graph."
         return len(self.__g)
 
-    def listNodes(self):
+    def getNodes(self):
         "Returns a list of all nodes"
         return [n for n in g]
 
@@ -75,7 +72,7 @@ class Graph:
         self.__g[n2][n1] = 1
         return 1
     
-    def findDistToNode(self, n):
+    def getDistToNode(self, n):
         """Returns a dictionary of the distance (shortest path) between
         node n and every reachable node (from n) in the graph."""
         currentDistance = 0
@@ -106,7 +103,7 @@ class Graph:
 
         return shortestPaths
 
-    def computeConnectivityCoefficient(self, n):
+    def getCC(self, n):
         """Returns connectivity coefficient (cc) of node n.
 
         cc = 2 * nv / kv(kv-1)
@@ -130,7 +127,7 @@ class Graph:
         if kv > 1: return 2.0 * nv / (kv * (kv-1))
         else: return 0
 
-    def findNeighbors(self, n):
+    def getNeighbors(self, n):
         "Returns list of neighbors of node n."
         try:
             neighbors = [nb for nb in self.__g[n]]
@@ -138,9 +135,9 @@ class Graph:
             neighbors = []
         return neighbors
 
-    def findBridgeLinks(self, root):
+    def getBridgeLinks(self, root):
         s = RSTree(self.__g, root)
-        return s.findBridgeLinks()
+        return s.getBridgeLinks()
 
 
 class RSTree:
