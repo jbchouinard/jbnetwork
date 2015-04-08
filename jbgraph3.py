@@ -150,6 +150,10 @@ class RSTree:
 
     def __init__(self, G, root):
         self.__root = root
+        self.__POMap = None
+        self.__highPOMap = None
+        self.__descMap = None
+        self.__lowPOMap = None
         S = {root:{}}
         marked = [root]
         openList = [root]
@@ -171,7 +175,7 @@ class RSTree:
 
         while (openList != []):
             current = openList.pop(0)
-            neighbors = G.findNeighbors(current)
+            neighbors = G.getNeighbors(current)
 
             for nb in neighbors:
                 if nb not in marked:
@@ -182,29 +186,35 @@ class RSTree:
                     addRedLink(current, nb)
         self.__S = S
 
-    def asDict(self):
+    def getAsDict(self):
         return self.__S
 
-    def postOrder(self):
+    def getPostOrder(self):
         '''Returns mapping of node to rank in post-order traversal.'''
+        if self.__POMap is not None:
+            return self.__POMap
+
         POMap = {}
 
-        def recPostOrder(current, n):
+        def recPostOrder(current, k):
             # visit childen from left to right
             # children are green-linked nodes that are not the parent
             linked = self.__S[current]
             children = [n for n in linked if linked[n] == 'green']
             for child in children:
-                n = recPostOrder(child, n)
-            POMap[current] = n
-            return n+1
+                k = recPostOrder(child, k)
+            POMap[current] = k
+            return k+1
 
         recPostOrder(self.__root, 1)
         self.__POMap = POMap
         return POMap
 
-    def numberOfDescendants(self):
+    def getDescCount(self):
         "Return mapping of node to number of descendants (including itself)"
+        if self.__descMap is not None:
+            return self.__descMap
+
         descMap = {}
 
         def howManyAreYouBelow(current):
@@ -221,15 +231,18 @@ class RSTree:
         self.__descMap = descMap
         return descMap
 
-    def lowestPostOrder(self):
+    def getLowPostOrder(self):
         """Returns mapping of node to the lowest post-order value below it
         (including itself; and one none-tree (red) edge can be traversed."""
+        if self.__lowPOMap is not None:
+            return self.__lowPOMap
+
         lowPOMap = {}
 
         def whatIsTheLowestPOBelow(current,redTraversed):
             links = self.__S[current]
             children = [n for n in self.__S[current]]
-            lowestPO = self.__POMap[current]
+            lowestPO = self.getPostOrder()[current]
 
             for child in children:
                 if links[child] == 'green':
@@ -237,31 +250,32 @@ class RSTree:
                 elif links[child] == 'red' and redTraversed == 0:
                     lowestPO = min(lowestPO, whatIsTheLowestPOBelow(child, 1))
 
-            lowPOMap[current] = lowestPO
+            lowPOMap[current] = min(lowPOMap.get(current, lowestPO), lowestPO)
             return lowestPO
 
         whatIsTheLowestPOBelow(self.__root, 0)
         self.__lowPOMap = lowPOMap
         return lowPOMap
 
-    def highestPostOrder(self):
+    def getHighPostOrder(self):
         """Returns mapping of node to the lowest post-order value below it,
         including itself; and one none-tree (red) edge can be traversed."""
+        if self.__highPOMap is not None:
+            return self.__highPOMap
+
         highPOMap = {}
 
         def whatIsTheHighestPOBelow(current,redTraversed):
             linked = self.__S[current]
             children = [n for n in linked]
 
-            highestPO = self.__POMap[current]
-
+            highestPO = self.getPostOrder()[current]
             for child in children:
                 if linked[child] == 'green':
                     highestPO = max(highestPO, whatIsTheHighestPOBelow(child,redTraversed))
                 elif linked[child] == 'red' and redTraversed == 0:
                     highestPO = max(highestPO, whatIsTheHighestPOBelow(child, 1))
-
-            highPOMap[current] = highestPO
+            highPOMap[current] = max(highPOMap.get(current, highestPO), highestPO)
             return highestPO
 
         whatIsTheHighestPOBelow(self.__root, 0)
