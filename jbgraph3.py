@@ -282,22 +282,24 @@ class RSTree:
         self.__highPOMap = highPOMap
         return highPOMap
 
-    def findBridgeLinks(self):
+    def getBridgeLinks(self):
         """Returns bridge links in the graph as list of links"""
-        if not hasattr(self, __POMap):
-            self.postOrder()
-        if not hasattr(self, __descMap):
-            self.numberOfDescendants()
-        if not hasattr(self, __lowPOMap):
-            self.lowestPostOrder()
-        if not hasattr(self, __highPOMap):
-            self.highestPostOrder()
-
         bridgeLinks = []
 
-        
+        def isBridgeLink(n1, n2):
+            if (self.__S[n1][n2] == 'green' and
+                    self.getHighPostOrder()[n2] <= self.getPostOrder()[n2] and
+                    self.getLowPostOrder()[n2] > (self.getPostOrder()[n2] - self.getDescCount()[n2])):
+                return True
+            else:
+                return False
 
-        return brigdeLinks
+        for n1 in self.__S:
+            for n2 in self.__S[n1]:
+                if isBridgeLink(n1, n2):
+                    bridgeLinks.append((n1, n2))
+
+        return bridgeLinks
 
                 
 class GraphFactory():
