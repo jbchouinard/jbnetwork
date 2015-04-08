@@ -334,7 +334,6 @@ class GraphFactory():
         randomGraphMaker = GraphFactory(gtype = 'random', size = 100, p = 0.3)
 
         Change defaults:
-         randomGraphMaker.setDefaults(size = 200, p = 0.5)
 
         Size of hypercube is rounded down to nearest power of 2
          hyperMaker = GraphFactory(gtype = 'hypercube', size = 64)
@@ -361,27 +360,22 @@ class GraphFactory():
 
         See help(GraphFactory) for usage examples.
         """
-        args = {}
+        constructors = { 'star': (self.__makeStarGraph, ('size',)),
+            'clique': (self.__makeCliqueGraph, ('size',)),
+            'random': (self.__makeRandomGraph, ('size','p')),
+            'hypercube': (self.__makeHypercubeGraph, ('size',)),
+            'ring': (self.__makeRingGraph, ('size',)),
+            'chain': (self.__makeChainGraph, ('size',)),
+            'grid': (self.__makeGridGraph, ('sizeX', 'sizeY')) }
 
-        for setting in self.__validSettings:
-            if setting in kwargs:
-                args[setting] = kwargs[setting]
-            else:
-                args[setting] = self.__defaults[setting]
+        gtype = kwargs.get('gtype', self.__defaults['gtype'])
+        args = [ kwargs.get(name, self.__defaults[name]) for name in constructors[gtype][1] ]
+        func = constructors[gtype][0]
 
-        if args['gtype'] == 'star': return self.__makeStarGraph(args['size'])
-        elif args['gtype'] == 'clique': return self.__makeCliqueGraph(args['size'])
-        elif args['gtype'] == 'random': return self.__makeRandomGraph(args['size'], args['p'])
-        elif args['gtype'] == 'hypercube': return self.__makeHypercubeGraph(args['size'])
-        elif args['gtype'] == 'ring': return self.__makeRingGraph(args['size'])
-        elif args['gtype'] == 'chain': return self.__makeChainGraph(args['size'])
-        elif args['gtype'] == 'grid': return self.__makeGridGraph(args['sizeX'], args['sizeY'])
-        
-        raise ValueError('Invalid graph type.')
+        return func(*args)
 
     def setDefaults(self, **kwargs):
         """Change settings of default graph produced by constructGraph.
-
         Usage: graphFactoryInstance.setDefaults(setting = value, setting = value...)"""
         for kw in kwargs:
             if kw in self.__validSettings:
