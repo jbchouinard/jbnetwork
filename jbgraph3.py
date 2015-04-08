@@ -461,38 +461,59 @@ class GraphFactory():
                 g.addLink(n, n+sizeX)
         return g
 
+import math
 
 def test_PO():
     g = GraphFactory().constructGraph(gtype='ring', size=10)
     s = RSTree(g, 0)
-    pomap = s.postOrder(0)
-    ndmap = s.numberOfDescendants(0)
-    lopomap = s.lowestPostOrder(0, pomap)
-    hipomap = s.highestPostOrder(0, pomap)
-
+    pomap = s.getPostOrder()
+    ndmap = s.getDescCount()
+    lopomap = s.getLowPostOrder()
+    hipomap = s.getHighPostOrder()
+    blinks = s.getBridgeLinks()
+    return pomap, ndmap, lopomap, hipomap, blinks
 
 def test_GF():
-    sizeXs = [4, 8, 16, 32, 64, 128]
+    sizeXs = [8, 16, 32, 64]
     sizeYs = sizeXs
     sizes = [n*n for n in sizeXs]
-    ps = [0, 0.5, 1]
+    ps = [(1/(len(sizes)))*n for n in range(len(sizes))]
     gtypes = [ 'random', 'star' , 'clique', 'ring', 'chain', 'grid', 'hypercube' ]
-
     lens = []
+    print(sizes)
 
     for gtype in gtypes:
         for i in range(len(sizes)):
-            g = GraphFactory().constructGraph(gtype = gtype, 
-                                            size = sizes[i],
-                                            sizeX = sizeXs[i],
-                                            sizeY = sizeYs[i],
-                                            p = ps[i])
-            
+            g = GraphFactory().constructGraph(gtype=gtype, 
+                size=sizes[i],
+                sizeX=sizeXs[i],
+                sizeY=sizeYs[i],
+                p=ps[i])
 
-            #g.findDistToNode(0)
-            g.computeConnectivityCoefficient(0)
-            g.findNeighbors(0)
-
-            lens.append((sizes[i], len(g.asDict())))
-
+            #g.getDistToNode()
+            g.getCC(0)
+            g.getNeighbors(0)
+            lens.append((sizes[i], len(g.getAsDict())))
     return lens
+
+def test_BL():
+    g = GraphFactory().constructGraph(gtype='ring', size=10)
+    s = RSTree(g, 0)
+    print(s.getBridgeLinks() == [])
+
+    links = [(0,1),(0,2),(2,3),(1,3),(3,4),(4,6),(4,5),(5,6)]
+
+    g = Graph()
+    for link in links:
+        g.addLink(*link)
+
+    s = RSTree(g, 0)
+    print(s.getBridgeLinks() == [(3,4)])
+
+    g = GraphFactory().constructGraph(gtype="chain", size=4)
+    s = RSTree(g,0)
+    print(s.getBridgeLinks() == [(0,1),(1,2),(2,3)])
+
+    g = GraphFactory().constructGraph(gtype="clique", size=10)
+    s = RSTree(g,0)
+    print(s.getBridgeLinks() == [])
