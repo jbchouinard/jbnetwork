@@ -98,6 +98,55 @@ class Graph:
                     open_list.append(neighbor)
         return distance_from_start  
 
+    def getACM_naive(self, nodes = 'all'):
+        if nodes == 'all':
+            nodes = self.getNodes()
+        acmap = {}
+        for n in nodes:
+            acmap[n] = self.getNodeCentrality(n)
+        return acmap
+
+    # def getACM_split(self, nodes = 'all'):
+
+    #     def merge(acmaps, dmaps, roots):
+    #         for i in [0,1]:
+    #             acm1 = acmaps[i]
+    #             acm2 = acmaps[(1-i)]
+    #             w1 = len(dmaps[i])
+    #             w2 = len(dmaps[(1-i)])
+    #             r2 = roots[(1-i)]
+    #             dm1 = dmaps[i]
+
+    #             for n in dm1:
+    #                 acmap[n] = (acm1[n]*w1 + (dm1[n]+1+acm2[r2])*w2) / (w1+w2)
+
+    #         return acmap
+
+
+    #     nodes = self.getNodes()
+    #     root = nodes[random.randint(0,len(nodes))]
+        
+    #     bLinks = self.getBridgeLinks()
+
+    #     for link in bLinks:
+    #         self.removeLink(link)
+
+    #     reachable = [n for n in self.getDistToNode(root)]
+    #     acmap = getACM_naive(nodes = reachable)
+
+    #     openList = bLinks[:]
+    #     while (openList != []):
+    #         link = openList[0]
+    #         if link[0] in acmap:
+    #             dmaps = [self.getDistToNode(root) for root in link]
+    #             nodes = 
+    #             acmaps = [self.getACM_naive]
+
+    #         else:
+    #             openList.insert(0, openList.pop())
+
+    #     return acmap
+
     def getNodeClusteringCoefficient(self, n):
         """Returns connectivity coefficient (cc) of node n.
 
