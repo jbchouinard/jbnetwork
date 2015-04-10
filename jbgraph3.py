@@ -103,9 +103,8 @@ class Graph:
 
         return shortestPaths
 
-    def getCC(self, n):
-        """Returns connectivity coefficient (cc) of node n.
-
+    def getNodeClusteringCoefficient(self, n):
+        """Returns clustering coefficient (cc) of node n.
         cc = 2 * nv / kv(kv-1)
 
         where
@@ -126,7 +125,7 @@ class Graph:
 
         if kv > 1: return 2.0 * nv / (kv * (kv-1))
         else: return 0
-
+        
     def getNeighbors(self, n):
         "Returns list of neighbors of node n."
         try:
