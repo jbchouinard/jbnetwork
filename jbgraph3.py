@@ -71,40 +71,36 @@ class Graph:
         self.__g[n1][n2] = 1
         self.__g[n2][n1] = 1
         return 1
+
+    def removeLink(self, n1, n2):
+        "Remove link between n1 and n2."
+        del self.__g[n1][n2]
+        del self.__g[n2][n1]
     
-    def getDistToNode(self, n):
-        """Returns a dictionary of the distance (shortest path) between
+    def getNodeCentrality(self, v):
+        """Returns the average distance (shortest path) between
         node n and every reachable node (from n) in the graph."""
-        currentDistance = 0
-        shortestPaths = {n:0}
-        currentlyVisiting = [n]
+        distance_from_start = self.getDistanceToNode(v)
+        return float(sum(distance_from_start.values()))/len(distance_from_start) 
 
-        # TODO: this function is super slow
-        # Pretty sure there is a faster way to do this
-        def findNewNeighbors(nodes):
-            newNeighbors = []
-            for n in nodes:
-                try:
-                    for nb in self.__g[n]:
-                        if nb not in shortestPaths:
-                            newNeighbors.append(nb)
-                except KeyError:
-                    raise ValueError('Node ' + str(n) + ' does not exist.')
-            return newNeighbors
-
-        while (currentlyVisiting != []):
-            newNeighbors = findNewNeighbors(currentlyVisiting)
-
-            for nb in newNeighbors:
-                shortestPaths[nb] = currentDistance + 1
-
-            currentlyVisiting = newNeighbors
-            currentDistance += 1
-
-        return shortestPaths
+    def getDistanceToNode(self, v):
+        """Returns the distance (shortest path) between
+        node n and every reachable node (from n) in the graph."""
+        open_list = [v]
+        distance_from_start = {}
+        distance_from_start[v] = 0
+        while len(open_list) > 0:
+            current = open_list[0]
+            del open_list[0]
+            for neighbor in self.__g[current].keys():
+                if neighbor not in distance_from_start:
+                    distance_from_start[neighbor] = distance_from_start[current] + 1
+                    open_list.append(neighbor)
+        return distance_from_start  
 
     def getNodeClusteringCoefficient(self, n):
-        """Returns clustering coefficient (cc) of node n.
+        """Returns connectivity coefficient (cc) of node n.
+
         cc = 2 * nv / kv(kv-1)
 
         where
@@ -125,7 +121,7 @@ class Graph:
 
         if kv > 1: return 2.0 * nv / (kv * (kv-1))
         else: return 0
-        
+
     def getNeighbors(self, n):
         "Returns list of neighbors of node n."
         try:
