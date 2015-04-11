@@ -15,6 +15,7 @@ me@jeromebchouinard.ca
 """
 import sys
 import random
+import pprint
 
 class Graph:
     """This class represents a graph of labeled, attribute-less node
@@ -23,7 +24,7 @@ class Graph:
             getLinkCount
             getNodeCount
             getAsDict
-            getDistToNode
+            getDistanceToNode
             getNeighbors
             getCC
             getNodes
@@ -53,7 +54,7 @@ class Graph:
 
     def getNodes(self):
         "Returns a list of all nodes"
-        return [n for n in g]
+        return [n for n in self.__g]
 
     def addNode(self, n):
         "Create a new (unconnected) node in the graph."
@@ -98,7 +99,9 @@ class Graph:
                     open_list.append(neighbor)
         return distance_from_start  
 
-    def getACM_naive(self, nodes = 'all'):
+    def getACM_naive(self, nodes='all'):
+        """Get the average centrality map of the graph,
+        using a naive O(n^2) algorithm."""
         if nodes == 'all':
             nodes = self.getNodes()
         acmap = {}
@@ -106,46 +109,52 @@ class Graph:
             acmap[n] = self.getNodeCentrality(n)
         return acmap
 
-    # def getACM_split(self, nodes = 'all'):
+    def getACM_split(self, nodes='all'):
+        """ Get the average centrality map using a hopefully
+        faster algorithm that split the graph into components
+        by breaking bridge edges. """
+        def merge_acmaps(acmaps, dmaps, roots):
+            acmap = {}
+            for i in [0,1]:
+                acm1 = acmaps[i]
+                acm2 = acmaps[(1-i)]
+                w1 = len(dmaps[i])
+                w2 = len(dmaps[(1-i)])
+                r2 = roots[(1-i)]
+                dm1 = dmaps[i]
+                for n in dm1:
+                    acmap[n] = (acm1[n]*w1 + (dm1[n]+1+acm2[r2])*w2) / (w1+w2)
+            return acmap
 
-    #     def merge(acmaps, dmaps, roots):
-    #         for i in [0,1]:
-    #             acm1 = acmaps[i]
-    #             acm2 = acmaps[(1-i)]
-    #             w1 = len(dmaps[i])
-    #             w2 = len(dmaps[(1-i)])
-    #             r2 = roots[(1-i)]
-    #             dm1 = dmaps[i]
+        nodes = self.getNodes()
+        spanroot = nodes[random.randint(0,len(nodes))]
+        bLinks = self.getBridgeLinks(spanroot)
+        for link in bLinks:
+            self.removeLink(link[0], link[1])
 
-    #             for n in dm1:
-    #                 acmap[n] = (acm1[n]*w1 + (dm1[n]+1+acm2[r2])*w2) / (w1+w2)
+        root0 = bLinks[0][0]
+        dmap0 = self.getDistanceToNode(root0)
+        reachable = [n for n in dmap0]
+        acmap0 = self.getACM_naive(nodes=reachable)
 
-    #         return acmap
-
-
-    #     nodes = self.getNodes()
-    #     root = nodes[random.randint(0,len(nodes))]
-        
-    #     bLinks = self.getBridgeLinks()
-
-    #     for link in bLinks:
-    #         self.removeLink(link)
-
-    #     reachable = [n for n in self.getDistToNode(root)]
-    #     acmap = getACM_naive(nodes = reachable)
-
-    #     openList = bLinks[:]
-    #     while (openList != []):
-    #         link = openList[0]
-    #         if link[0] in acmap:
-    #             dmaps = [self.getDistToNode(root) for root in link]
-    #             nodes = 
-    #             acmaps = [self.getACM_naive]
-
-    #         else:
-    #             openList.insert(0, openList.pop())
-
-    #     return acmap
+        openList = bLinks
+        while (openList != []):
+            bridge = openList.pop(0)
+            # DEBUG
+            if bridge[0] in acmap0:
+                root0 = bridge[0]
+                root1 = bridge[1]
+                dmap0 = self.getDistanceToNode(root0)
+                dmap1 = self.getDistanceToNode(root1)
+                reach1 = [n for n in dmap1]
+                acmap1 = self.getACM_naive(nodes=reach1)
+                acmap0 = merge_acmaps([acmap0, acmap1], [dmap0, dmap1], bridge)
+                self.addLink(root0, root1)
+            else:
+                # If the bridge doesn't connect, flip it
+                # Maybe the other side connects!
+                openList.insert(len(openList), (bridge[1], bridge[0]))
+        return acmap0
 
     def getNodeClusteringCoefficient(self, n):
         """Returns connectivity coefficient (cc) of node n.
@@ -180,7 +189,7 @@ class Graph:
         return neighbors
 
     def getBridgeLinks(self, root):
-        s = RSTree(self.__g, root)
+        s = RSTree(self, root)
         return s.getBridgeLinks()
 
 
@@ -534,7 +543,7 @@ def test_GF():
                 sizeY=sizeYs[i],
                 p=ps[i])
 
-            #g.getDistToNode()
+            #g.getDistanceToNode()
             g.getCC(0)
             g.getNeighbors(0)
             lens.append((sizes[i], len(g.getAsDict())))
