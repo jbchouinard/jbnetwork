@@ -15,6 +15,7 @@ me@jeromebchouinard.ca
 """
 import sys
 import random
+import pprint
 
 class Graph:
     """This class represents a graph of labeled, attribute-less node
@@ -23,7 +24,7 @@ class Graph:
             getLinkCount
             getNodeCount
             getAsDict
-            getDistToNode
+            getDistanceToNode
             getNeighbors
             getCC
             getNodes
@@ -53,7 +54,7 @@ class Graph:
 
     def getNodes(self):
         "Returns a list of all nodes"
-        return [n for n in g]
+        return [n for n in self.__g]
 
     def addNode(self, n):
         "Create a new (unconnected) node in the graph."
@@ -71,40 +72,93 @@ class Graph:
         self.__g[n1][n2] = 1
         self.__g[n2][n1] = 1
         return 1
+
+    def removeLink(self, n1, n2):
+        "Remove link between n1 and n2."
+        del self.__g[n1][n2]
+        del self.__g[n2][n1]
     
-    def getDistToNode(self, n):
-        """Returns a dictionary of the distance (shortest path) between
+    def getNodeCentrality(self, v):
+        """Returns the average distance (shortest path) between
         node n and every reachable node (from n) in the graph."""
-        currentDistance = 0
-        shortestPaths = {n:0}
-        currentlyVisiting = [n]
+        distance_from_start = self.getDistanceToNode(v)
+        return float(sum(distance_from_start.values()))/len(distance_from_start) 
 
-        # TODO: this function is super slow
-        # Pretty sure there is a faster way to do this
-        def findNewNeighbors(nodes):
-            newNeighbors = []
-            for n in nodes:
-                try:
-                    for nb in self.__g[n]:
-                        if nb not in shortestPaths:
-                            newNeighbors.append(nb)
-                except KeyError:
-                    raise ValueError('Node ' + str(n) + ' does not exist.')
-            return newNeighbors
+    def getDistanceToNode(self, v):
+        """Returns the distance (shortest path) between
+        node n and every reachable node (from n) in the graph."""
+        open_list = [v]
+        distance_from_start = {}
+        distance_from_start[v] = 0
+        while len(open_list) > 0:
+            current = open_list[0]
+            del open_list[0]
+            for neighbor in self.__g[current].keys():
+                if neighbor not in distance_from_start:
+                    distance_from_start[neighbor] = distance_from_start[current] + 1
+                    open_list.append(neighbor)
+        return distance_from_start  
 
-        while (currentlyVisiting != []):
-            newNeighbors = findNewNeighbors(currentlyVisiting)
+    def getACM_naive(self, nodes='all'):
+        """Get the average centrality map of the graph,
+        using a naive O(n^2) algorithm."""
+        if nodes == 'all':
+            nodes = self.getNodes()
+        acmap = {}
+        for n in nodes:
+            acmap[n] = self.getNodeCentrality(n)
+        return acmap
 
-            for nb in newNeighbors:
-                shortestPaths[nb] = currentDistance + 1
+    def getACM_split(self, nodes='all'):
+        """ Get the average centrality map using a hopefully
+        faster algorithm that split the graph into components
+        by breaking bridge edges. """
+        def merge_acmaps(acmaps, dmaps, roots):
+            acmap = {}
+            for i in [0,1]:
+                acm1 = acmaps[i]
+                acm2 = acmaps[(1-i)]
+                w1 = len(dmaps[i])
+                w2 = len(dmaps[(1-i)])
+                r2 = roots[(1-i)]
+                dm1 = dmaps[i]
+                for n in dm1:
+                    acmap[n] = (acm1[n]*w1 + (dm1[n]+1+acm2[r2])*w2) / (w1+w2)
+            return acmap
 
-            currentlyVisiting = newNeighbors
-            currentDistance += 1
+        nodes = self.getNodes()
+        spanroot = nodes[random.randint(0,len(nodes))]
+        bLinks = self.getBridgeLinks(spanroot)
+        for link in bLinks:
+            self.removeLink(link[0], link[1])
 
-        return shortestPaths
+        root0 = bLinks[0][0]
+        dmap0 = self.getDistanceToNode(root0)
+        reachable = [n for n in dmap0]
+        acmap0 = self.getACM_naive(nodes=reachable)
+
+        openList = bLinks
+        while (openList != []):
+            bridge = openList.pop(0)
+            # DEBUG
+            if bridge[0] in acmap0:
+                root0 = bridge[0]
+                root1 = bridge[1]
+                dmap0 = self.getDistanceToNode(root0)
+                dmap1 = self.getDistanceToNode(root1)
+                reach1 = [n for n in dmap1]
+                acmap1 = self.getACM_naive(nodes=reach1)
+                acmap0 = merge_acmaps([acmap0, acmap1], [dmap0, dmap1], bridge)
+                self.addLink(root0, root1)
+            else:
+                # If the bridge doesn't connect, flip it
+                # Maybe the other side connects!
+                openList.insert(len(openList), (bridge[1], bridge[0]))
+        return acmap0
 
     def getNodeClusteringCoefficient(self, n):
-        """Returns clustering coefficient (cc) of node n.
+        """Returns connectivity coefficient (cc) of node n.
+
         cc = 2 * nv / kv(kv-1)
 
         where
@@ -125,7 +179,7 @@ class Graph:
 
         if kv > 1: return 2.0 * nv / (kv * (kv-1))
         else: return 0
-        
+
     def getNeighbors(self, n):
         "Returns list of neighbors of node n."
         try:
@@ -135,7 +189,7 @@ class Graph:
         return neighbors
 
     def getBridgeLinks(self, root):
-        s = RSTree(self.__g, root)
+        s = RSTree(self, root)
         return s.getBridgeLinks()
 
 
@@ -489,7 +543,7 @@ def test_GF():
                 sizeY=sizeYs[i],
                 p=ps[i])
 
-            #g.getDistToNode()
+            #g.getDistanceToNode()
             g.getCC(0)
             g.getNeighbors(0)
             lens.append((sizes[i], len(g.getAsDict())))
