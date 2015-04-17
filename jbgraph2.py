@@ -194,17 +194,19 @@ class NetworkFactory:
         Types of networks:
         star -- one central node, connected to all other nodes
         clique -- all nodes interconnected
-        chain -- 
+        chain --
         ring --
-        hypercube -- 
+        hypercube --
         grid -- x by y grid of nodes
         random -- each node has probability p of being connected to each other node (Erdos-Renyi)
         """
-        self.defaults = { 'gtype': gtype,
-            'size': size,
-            'p': p,
-            'size_x': sizeX,
-            'size_y': sizeY }
+        self.defaults = {
+            'shape': kwargs.get('shape', None),
+            'size': kwargs.get('size', None),
+            'p': kwargs.get('p', None),
+            'size_x': kwargs.get('size_x', None),
+            'size_y': kwargs.get('size_y', None)
+            }
 
     def build_network(self, **kwargs):
         """
@@ -215,21 +217,24 @@ class NetworkFactory:
         return Network()
 
     @staticmethod
-    def _build_star_network(size):
+    def build_star_network(size):
+        """Build a star network. Returns Network object."""
         network = Network()
         for i in range(1, size):
             network.add_link(0, i)
         return network
 
     @staticmethod
-    def _build_chain_network(size):
+    def build_chain_network(size):
+        """Build a chain network. Returns Network object."""
         network = Network()
         for i in range(size-1):
             network.add_link(i, i+1)
         return network
 
     @staticmethod
-    def _build_ring_network(size):
+    def build_ring_network(size):
+        """Build a ring network. Returns Network object."""
         network = Network()
         for i in range(size-1):
             network.add_link(i, i+1)
@@ -237,10 +242,11 @@ class NetworkFactory:
         return network
 
     @staticmethod
-    def _build_random_network(size, p):
+    def build_random_network(size, p):
+        """Build a random (Erdos-Renyi) network. Returns Network object."""
         network = Network()
         for i in range(size):
-            network.addNode(i)
+            network.add_node(i)
         for i in range(size-1):
             for j in range(i+1, size):
                 if random.random() < p:
@@ -248,7 +254,8 @@ class NetworkFactory:
         return network
 
     @staticmethod
-    def _build_clique_network(size):
+    def build_clique_network(size):
+        """Build a clique network. Returns Network object."""
         network = Network()
         for i in range(size-1):
             for j in range(i+1, size):
@@ -256,40 +263,42 @@ class NetworkFactory:
         return network
 
     @staticmethod
-    def _build_hypercube_network(size):
-        def recMakeHG(n):
+    def build_hypercube_network(size):
+        """Build a hypercube network. Returns Network object."""
+        def _rec_build_hc_net(n):
             if n == 1:
                 return {0:{}}
 
             m = int(n/2)
             network = {}
-            g1 = recMakeHG(m)
+            network1 = _rec_build_hc_net(m)
 
-            for node1 in g1:
-                g[node1] = g1[node1]
-                g[node1 + m] = {}
-                for node2 in g1[node1]:
-                    g[node1 + m][node2 + m] = 1
+            for node1 in network1:
+                network[node1] = network1[node1]
+                network[node1 + m] = {}
+                for node2 in network1[node1]:
+                    network[node1 + m][node2 + m] = 1
 
-                g[node1][node1 + m] = 1
-                g[node1 + m][node1] = 1
+                network[node1][node1 + m] = 1
+                network[node1 + m][node1] = 1
             return network
 
         # Find largest power of 2 < size
-        n = 1
-        while(n <= size):
-            n = n*2
-        n = n/2
+        nn = 1
+        while nn <= size:
+            nn = nn*2
+        nn = nn/2
 
-        network = recMakeHG(n)
-        return Network(fromDict = g)
+        network = _rec_build_hc_net(nn)
+        return Network(fromDict=network)
 
     @staticmethod
-    def _build_grid_network(sizeX, sizeY):
+    def build_grid_network(size_x, size_y):
+        """Build a grid network. Returns Network object."""
         network = Network()
-        for n in range(sizeX * sizeY):
-            if ((n+1) % sizeX != 0):
+        for n in range(size_x * size_y):
+            if (n+1) % size_x != 0:
                 network.add_link(n, n+1)
-            if (n < (sizeY - 1)*sizeX):
-                network.add_link(n, n+sizeX)
+            if n < (size_y - 1)*size_x:
+                network.add_link(n, n+size_x)
         return network
