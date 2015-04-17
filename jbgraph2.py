@@ -6,6 +6,8 @@ Network  -- a network of nodes
 RSTree  -- rooted spanning tree, created from a Network objects
 NetworkFactory -- generate classic networks (star, clique, erdos-renyi, etc.)
 """
+import random
+
 __all__ = ['Network']
 
 class Network:
@@ -28,7 +30,7 @@ class Network:
         fromDict -- dictionary from which to create the network
 
         Dictionary format: {node1:{node2:1, node3:1}}
-        """manipulating
+        """
         if fromDict is None:
             self._net = {}
         else:
@@ -77,29 +79,29 @@ class Network:
         """Nodes in the network."""
         return [node for node in self._net]
 
-    def compute_distances_to_node(self, node):
-        pass
+    # def compute_distances_to_node(self, node):
+    #     pass
 
-    def compute_node_centrality(self, node):
-        pass
+    # def compute_node_centrality(self, node):
+    #     pass
 
-    def map_ac_naive(self, nodes='all'):
-        pass
+    # def map_ac_naive(self, nodes='all'):
+    #     pass
 
-    def map_ac_split(self, nodes='all'):
-        pass
+    # def map_ac_split(self, nodes='all'):
+    #     pass
 
-    def compute_node_cc(self, node):
-        pass
+    # def compute_node_cc(self, node):
+    #     pass
 
-    def find_shortest_paths_to_node(self, node, algo="floyd-warshall"):
-        pass
+    # def find_shortest_paths_to_node(self, node, algo="floyd-warshall"):
+    #     pass
 
-    def estimate_node_cc(self, node):
-        pass
+    # def estimate_node_cc(self, node):
+    #     pass
 
-    def estimate_cc(self):
-        pass
+    # def estimate_cc(self):
+    #     pass
 
 
 class RSTree:
@@ -122,12 +124,13 @@ class RSTree:
         self._max_po_map = None
         self._desc_map = None
         self._min_po_map = None
-        
+
         tree = {root:{}}
         marked = [root]
         open_list = [root]
 
         def add_link(node1, node2, color):
+            """Add link to tree."""
             if not node1 in tree:
                 tree[node1] = {}
             if not node2 in tree:
@@ -136,38 +139,38 @@ class RSTree:
             if color == 'red':
                 tree[node2][node1] = 'red'
 
-        while (open_list != []):
+        while open_list != []:
             current = open_list.pop(0)
             neighbors = network.find_neighbors(current)
 
-            for nb in neighbors:
-                if nb not in marked:
-                    marked.append(nb)
-                    open_list.append(nb)
-                    add__link(current, nb, 'green')
-                elif nb not in tree[current] and current not in tree[nb]:
-                    add_link(current, nb, 'red')
+            for neighbor in neighbors:
+                if neighbor not in marked:
+                    marked.append(neighbor)
+                    open_list.append(neighbor)
+                    add_link(current, neighbor, 'green')
+                elif neighbor not in tree[current] and current not in tree[neighbor]:
+                    add_link(current, neighbor, 'red')
         self._tree = tree
 
-        @property
-        def po_map(self):
-            pass
+        # @property
+        # def po_map(self):
+        #     pass
 
-        @property
-        def desc_map(self):
-            pass
+        # @property
+        # def desc_map(self):
+        #     pass
 
-        @property
-        def max_po_map(self):
-            pass
+        # @property
+        # def max_po_map(self):
+        #     pass
 
-        @property
-        def min_po_map(self):
-            pass
+        # @property
+        # def min_po_map(self):
+        #     pass
 
-        @property
-        def bridge_links(self):
-            pass
+        # @property
+        # def bridge_links(self):
+        #     pass
 
 
 class NetworkFactory:
@@ -180,7 +183,7 @@ class NetworkFactory:
     Properties:
     defaults
     """
-    def __init__(self, size=None, shape=None, p=None, size_x=None, size_y=None):
+    def __init__(self, **kwargs):
         """
         Create a network factory with defaults specified by keyword args.
 
