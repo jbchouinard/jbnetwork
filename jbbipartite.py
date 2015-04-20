@@ -3,14 +3,14 @@ import csv
 import jbnetwork as jbnet
 
 
-def build_bp_network_from_tsv(tsvfn):
+def build_bp_network_from_csv(csvfn, delim=','):
     """
-    Build a bipartite network from a tsv file.
+    Build a bipartite network from a csv file.
     """
     net = jbnet.Network()
 
-    with open(tsvfn, 'r') as tsvf:
-        rdr = csv.reader(tsvf, delimiter='\t')
+    with open(csvfn, 'r') as csvf:
+        rdr = csv.reader(csvf, delimiter=delim)
 
         nodes_left = []
         nodes_right = []
