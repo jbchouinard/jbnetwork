@@ -98,7 +98,7 @@ class Network:
     @property
     def link_count(self):
         """Number of links in the network."""
-        return int(sum([sum(self._net[n].values()) for n in self._net]) / 2)
+        return int(sum([len(self._net[n].values()) for n in self._net]) / 2)
 
     @property
     def node_count(self):
@@ -148,7 +148,12 @@ class Network:
             acmap = {}
             for node in nodes:
                 acmap[node] = self.compute_node_centrality(node)
-            return acmap
+            nodes = self.nodes
+            
+        acmap = {}
+        for node in nodes:
+            acmap[node] = self.compute_node_centrality(node)
+        return acmap
 
     def map_ac2(self):
         """
@@ -214,6 +219,7 @@ class Network:
                 if neighbors[j] in self.find_neighbors(neighbors[i]):
                     nv += 1
 
+        return 2.0*nv/(kv*(kv-1))
         return 2.0*nv/(kv*(kv+1))
 
     def map_weighted_distance_to_node(self, node):
@@ -384,6 +390,7 @@ class RSTree:
                 _max_po_map[current] = max(_max_po_map[current], max_po)
             else:
                 _max_po_map[current] = max_po
+            return max_po
 
         _max_po_below(self.root, 0)
         self._max_po_map = _max_po_map
@@ -421,6 +428,7 @@ class RSTree:
                 _min_po_map[current] = min(_min_po_map[current], min_po)
             else:
                 _min_po_map[current] = min_po
+            return min_po
 
         _min_po_below(self.root, 0)
         self._min_po_map = _min_po_map
@@ -456,3 +464,47 @@ class RSTree:
 
         self._bridge_links = _bridge_links
         return _bridge_links
+
+
+def test():
+    edges = [
+        ('a', 'b', 10),
+        ('a', 'd', 1),
+        ('b', 'c', 1),
+        ('b', 'd', 4),
+        ('b', 'f', 5),
+        ('c', 'd', 20),
+        ('c', 'e', 1),
+        ('e', 'f', 1),
+        ('e', 'g', 1)]
+
+    test_net = Network()
+
+    for edge in edges:
+        test_net.add_link(edge[0], edge[1], weight=edge[2])
+
+    test_net.del_link('a', 'b')
+    test_net.add_link('a', 'b', weight=10)
+
+    assert test_net.node_count == 7
+    assert test_net.link_count == 9
+    assert set(test_net.find_neighbors('a')) == set(['b', 'd'])
+    assert test_net.link_weight('a', 'b') == 10
+    assert 'g' in test_net.nodes
+    assert test_net.compute_node_centrality('a') == 13/7
+    assert test_net.compute_node_cc('a') == 1
+    dist_map = test_net.map_distance_to_node('a')
+    assert dist_map['f'] == 2
+    dist_wt_map = test_net.map_weighted_distance_to_node('a')
+    assert dist_wt_map['f'] == (8, 5)
+    dist_peak_map = test_net.map_lowest_peak_to_node('a')
+    assert dist_peak_map['f'] == (4, 5)
+    assert test_net.bridge_links == [('e', 'g')] or test_net.bridge_links == [('g', 'e')]
+    ac_map = test_net.map_ac()
+    assert ac_map['a'] == 13/7
+    ac_map2 = test_net.map_ac2()
+    assert ac_map2['a'] == 13/7
+    
+
+if __name__ == '__main__':
+    test()
