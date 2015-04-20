@@ -6,6 +6,15 @@ Heap
 HeapOfTuples
 """
 class Heap:
+    """
+    Methods:
+    insert
+    pop
+    index
+    list
+    check_heap_property
+    is_less_than
+    """
     def __init__(self, elements=None, is_heap=False):
         self._heap = []
 
@@ -108,7 +117,29 @@ class Heap:
 
 
 class HeapOfTuples(Heap):
+    """
+    A heap of tuples.
+
+    Methods inherited from Heap:
+    insert
+    pop
+    index
+    list
+    check_heap_property
+
+    Extended methods:
+    __init__
+
+    Overriden methods:
+    is_less_than
+    """
     def __init__(self, i_val, elements=None, is_heap=False):
+        """
+        Arguments
+        i_val -- the position (index) of the element of the tuple to compare
+        elements -- list of elements to add to the heap
+        is_heap -- set to True is elements is already a heap
+        """
         self.i_val = i_val
         super().__init__(elements=elements, is_heap=is_heap)
 
