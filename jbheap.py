@@ -47,13 +47,10 @@ class Heap:
         is_less_than = self.is_less_than
 
         while i > 0:
-            try:
-                if is_less_than(L[i],  L[parent(i)]):
-                    L[i], L[parent(i)] = L[parent(i)], L[i]
-                    i = parent(i)
-                else:
-                    break
-            except IndexError:
+            if is_less_than(L[i],  L[parent(i)]):
+                L[i], L[parent(i)] = L[parent(i)], L[i]
+                i = parent(i)
+            else:
                 break
         return
 
@@ -65,19 +62,27 @@ class Heap:
         one_child = self._one_child
         is_leaf = self._is_leaf
 
-        while i < len(L) - 1:
-            try:
-                if is_less_than(L[left_child(i)], L[i]):
-                    L[i], L[left_child(i)] = L[left_child(i)], L[i]
-                    i = left_child(i)
-                elif i < len(L) - 2 and is_less_than(L[right_child(i)], L[i]):
-                    L[i], L[right_child(i)] = L[right_child(i)], L[i]
-                    i = right_child(i)
-                else:
-                    break
-            except IndexError:
+        while i < len(L)-1:
+            if is_leaf(i):
                 break
-        return
+            else:
+                if one_child(i):
+                    if is_less_than(L[lchild(i)], L[i]):
+                        L[i], L[lchild(i)] = L[lchild(i)], L[i]
+                    break
+                else:
+                    # Find smallest child
+                    if is_less_than(L[rchild(i)], L[lchild(i)]):
+                        i_child = rchild(i)
+                    else:
+                        i_child = lchild(i)
+
+                    # If the smallest child is smaller, swap
+                    if is_less_than(L[i_child], L[i]):
+                        L[i], L[i_child] = L[i_child], L[i]
+                        i = i_child
+                    else:
+                        break
 
     def is_less_than(self, el1, el2):
         return el1 < el2
