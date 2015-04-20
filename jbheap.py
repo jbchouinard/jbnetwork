@@ -93,6 +93,7 @@ class Heap:
                     else:
                         break
 
+
     def is_less_than(self, el1, el2):
         return el1 < el2
 
@@ -114,6 +115,20 @@ class Heap:
     def _one_child(self, i): 
         return (2*i+1 < len(self._heap)) and (2*i+2 >= len(self._heap))
 
+    def check_heap_property(self):
+        i = 0
+
+        while not self._is_leaf(i):
+            if self.is_less_than(self._heap[self._left_child(i)], self._heap[i]):
+                return False
+            try:
+                if self.is_less_than(self._heap[self._right_child(i)], self._heap[i]):
+                    return False
+            except IndexError:
+                pass
+            i += 1
+
+        return True
 
 
 class HeapOfTuples(Heap):
@@ -147,21 +162,28 @@ class HeapOfTuples(Heap):
         return el1[self.i_val] < el2[self.i_val]
 
 
+import random
+
 def test1():
-    heap = Heap(elements=[1,5,21,41,213,41,52,2,1,414])
-    print(heap._heap)
-    print(heap.pop())
-    print(heap._heap)
-    heap.insert(88)
-    print(heap._heap)
+    heap = Heap()
+    for i in range(10):
+        heap.insert(random.randint(0,100))
+
+    for i in range(3):
+        heap.pop()
+
+    assert heap.check_heap_property()
 
 
 def test2():
-    theap = HeapOfTuples(0, elements=zip(range(10), 'a'*10))
-    print(theap._heap)
-    theap.insert((5, 'a'))
-    print(theap.pop())
+    heap = HeapOfTuples(0)
+    for i in range(10000):
+        heap.insert((random.randint(0,30000),'foo'))
 
+    for i in range(2):
+        heap.pop()
+
+    assert heap.check_heap_property()
 
 if __name__ == "__main__":
     test1()
