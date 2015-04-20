@@ -19,7 +19,7 @@ class Heap:
 
     def insert(self, element):
         self._heap.append(element)
-        self.up_heapify(len(self._heap)-1)
+        self._up_heapify(len(self._heap)-1)
 
     def index(self, element):
         return self._heap.index(element)
@@ -32,7 +32,7 @@ class Heap:
         else:
             val = self._heap[0]
             self._heap[0] = self._heap.pop()
-            self.down_heapify(0)
+            self._down_heapify(0)
             return val
 
     def __len__(self):
@@ -41,9 +41,9 @@ class Heap:
     def list(self):
         return self._heap
 
-    def up_heapify(self, i):
+    def _up_heapify(self, i):
         L = self._heap
-        parent = self.parent
+        parent = self._parent
         is_less_than = self.is_less_than
 
         while i > 0:
@@ -57,11 +57,13 @@ class Heap:
                 break
         return
 
-    def down_heapify(self, i):
+    def _down_heapify(self, i):
         L = self._heap
-        left_child = self.left_child
-        right_child = self.right_child
+        lchild = self._left_child
+        rchild = self._right_child
         is_less_than = self.is_less_than
+        one_child = self._one_child
+        is_leaf = self._is_leaf
 
         while i < len(L) - 1:
             try:
@@ -81,24 +83,23 @@ class Heap:
         return el1 < el2
 
     @staticmethod
-    def parent(i): 
+    def _parent(i): 
         return (i-1)//2
 
     @staticmethod
-    def left_child(i): 
+    def _left_child(i): 
         return 2*i+1
 
     @staticmethod
-    def right_child(i): 
+    def _right_child(i): 
         return 2*i+2
 
-    @staticmethod
-    def is_leaf(i): 
-        return (2*i+2 >= len(L)) and (2*i+1 >= len(L))
+    def _is_leaf(self, i): 
+        return (2*i+2 >= len(self._heap)) and (2*i+1 >= len(self._heap))
 
-    @staticmethod
-    def one_child(i): 
-        return (2*i+1 < len(L)) and (2*i+2 >= len(L))
+    def _one_child(self, i): 
+        return (2*i+1 < len(self._heap)) and (2*i+2 >= len(self._heap))
+
 
 
 class HeapOfTuples(Heap):
