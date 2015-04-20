@@ -210,7 +210,7 @@ class Network:
                         i_x = [n[0] for n in dist_so_far_list].index(nbor)
                         if new_dist < dist_so_far_list[i_x][1]:
                             dist_so_far._heap[i_x] = (nbor, new_dist, new_hops)
-                            dist_so_far.up_heapify(i_x)
+                            dist_so_far._up_heapify(i_x)
                     except ValueError:
                         dist_so_far.insert((nbor, new_dist, new_hops))
 
