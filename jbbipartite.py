@@ -59,4 +59,21 @@ def map_bp_strongest_connections(str_of_connection):
         conn = str_of_connection[node][strongest]
         map_strongest.append((node, strongest, conn))
 
-    return map_strongest
+    return map_strongestdef find_diff_paths(network, nodes_to_check):
+    # Find # of nodes for which the shortest weighted path
+    # is not the same as the shortest path by number of hops
+    diffpaths = 0
+
+    for node in nodes_to_check:
+        wt_dist_map = network.map_weighted_distance_to_node(node)
+        nonwt_dist_map = network.map_distance_to_node(node)
+        for linked_node in wt_dist_map:
+            hops = nonwt_dist_map[linked_node]
+            wt_hops = wt_dist_map[linked_node][1]
+            if wt_hops != hops:
+                if linked_node in nodes_to_check:
+                    diffpaths += 0.5
+                else:
+                    diffpaths += 1.0
+
+    return diffpaths
