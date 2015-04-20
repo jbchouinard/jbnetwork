@@ -10,9 +10,11 @@ build_clique_network
 build_hypercube_network
 build_grid_network
 """
+import jbnetwork as jbn
+
 def build_star_network(size):
     """Build a star network. Returns Network object."""
-    network = Network()
+    network = jbn.Network()
     for i in range(1, size):
         network.add_link(0, i)
     return network
@@ -20,7 +22,7 @@ def build_star_network(size):
 
 def build_chain_network(size):
     """Build a chain network. Returns Network object."""
-    network = Network()
+    network = jbn.Network()
     for i in range(size-1):
         network.add_link(i, i+1)
     return network
@@ -28,7 +30,7 @@ def build_chain_network(size):
 
 def build_ring_network(size):
     """Build a ring network. Returns Network object."""
-    network = Network()
+    network = jbn.Network()
     for i in range(size-1):
         network.add_link(i, i+1)
     network.add_link(0, size-1)
@@ -37,7 +39,7 @@ def build_ring_network(size):
 
 def build_random_network(size, prob):
     """Build a random (Erdos-Renyi) network. Returns Network object."""
-    network = Network()
+    network = jbn.Network()
     for i in range(size):
         network.add_node(i)
     for i in range(size-1):
@@ -49,7 +51,7 @@ def build_random_network(size, prob):
 
 def build_clique_network(size):
     """Build a clique network. Returns Network object."""
-    network = Network()
+    network = jbn.Network()
     for i in range(size-1):
         for j in range(i+1, size):
             network.add_link(i, j)
@@ -89,7 +91,7 @@ def build_grid_network(dim):
     arguments
     dim -- (x, y) tuple of dimensions
     """
-    network = Network()
+    network = jbn.Network()
     for node in range(size[0] * size[1]):
         if (node+1) % size[0] != 0:
             network.add_link(node, node+1)

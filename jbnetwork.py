@@ -8,6 +8,8 @@ NetworkFactory -- generate classic networks (star, clique, erdos-renyi, etc.)
 """
 __all__ = ['Network', 'RSTree']
 
+import jbheap as jbh
+
 class Network:
     """
     A network of nodes.
@@ -43,21 +45,22 @@ class Network:
         if node not in self._net:
             self._net[node] = {}
 
-    def add_link(self, node1, node2):
+    def add_link(self, node1, node2, weight=1):
         """Make a link between nodes.
 
         n1 and n2 are created if they did not already exist."""
-        if not self.add_node(node1):
-            return -1
-        if not self.add_node(node2):
-            return -1
-        self._net[node1][node2] = 1
-        self._net[node2][node1] = 1
+        self.add_node(node1)
+        self.add_node(node2)
+        self._net[node1][node2] = weight
+        self._net[node2][node1] = weight
 
     def del_link(self, node1, node2):
         """Delete link between nodes"""
         del self._net[node1][node2]
         del self._net[node2][node1]
+
+    def link_weight(self, node1, node2):
+        return self._net[node1][node2]
 
     def find_neighbors(self, node):
         """Return list of neighbors of node."""
@@ -184,8 +187,40 @@ class Network:
 
         return 2.0*nv/(kv*(kv+1))
 
-    # def find_shortest_paths_to_node(self, node, algo="floyd-warshall"):
-    #     pass
+    def map_weighted_distance_to_node(self, node):
+        """
+        Map shortest weighted paths to a node using Djikstra algorithm.
+
+        Return a map of format {node: (shortest_path, number_of_hops)}.
+        """
+        dist_so_far = jbh.HeapOfTuples(1, elements=[(node, 0, 0)])
+        final_dist = {}
+        while len(dist_so_far) > 0:
+            current, dist, hops = dist_so_far.pop()
+            final_dist[current] = (dist, hops)
+
+            for nbor in self.find_neighbors(current):
+                if nbor not in final_dist:
+                    dist_so_far_list = dist_so_far.list()
+                    new_dist = final_dist[current][0] + self.link_weight(current, nbor)
+                    new_hops = final_dist[current][1] + 1
+                    try:
+                        # This is relying on implementation details of
+                        # jbheap - need to add interface to do this
+                        i_x = [n[0] for n in dist_so_far_list].index(nbor)
+                        if new_dist < dist_so_far_list[i_x][1]:
+                            dist_so_far._heap[i_x] = (nbor, new_dist, new_hops)
+                            dist_so_far.up_heapify(i_x)
+                    except ValueError:
+                        dist_so_far.insert((nbor, new_dist, new_hops))
+
+        return final_dist
+
+    def map_weighted_distances(self):
+        """
+        Map shortest weighted paths between all pairs of nodes using Floyd-Warshall algorithm.
+        """
+        pass
 
     # def estimate_node_cc(self, node):
     #     pass
