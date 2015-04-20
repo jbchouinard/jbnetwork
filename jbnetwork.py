@@ -144,10 +144,6 @@ class Network:
         nodes -- (optional) list of nodes to map. By default, map all nodes.
         """
         if nodes == 'all':
-            nodes = self.nodes()
-            acmap = {}
-            for node in nodes:
-                acmap[node] = self.compute_node_centrality(node)
             nodes = self.nodes
             
         acmap = {}
@@ -157,9 +153,13 @@ class Network:
 
     def map_ac2(self):
         """
-        Map average centrality using algorithm that splits the network at bridge edges.
+        Map average centrality using algorithm that splits the network at bridge links.
 
-        In practice appears to be slower than map_ac.
+        Algorithm is O(n^2/(k+1) + n(k+1)), where k is the number of bridge
+        links. Since 0<k<n, that's pretty much O(n^2); as is map_ac.
+
+        map_ac was actually faster, for the cases tested.
+
         Keyword arguments:
         nodes -- (optional) list of nodes to map. By default, map all nodes.
          """
@@ -220,7 +220,6 @@ class Network:
                     nv += 1
 
         return 2.0*nv/(kv*(kv-1))
-        return 2.0*nv/(kv*(kv+1))
 
     def map_weighted_distance_to_node(self, node):
         """
@@ -228,6 +227,17 @@ class Network:
 
         Return a map of format {node: (shortest_path, number_of_hops)}.
         """
+        return self._djikstra(node, lambda x,y: x+y)
+
+    def map_lowest_peak_to_node(self, node):
+        """
+        Map the paths to node minizing the weight of the heaviest link on the path.
+
+        Return the weight of the heaviest link for each reachable node.
+        """
+        return self._djikstra(node, lambda x,y: max(x,y))
+
+    def _djikstra(self, node, func_new_dist):
         dist_so_far = jbh.HeapOfTuples(1, elements=[(node, 0, 0)])
         final_dist = {}
         while len(dist_so_far) > 0:
@@ -237,7 +247,7 @@ class Network:
             for nbor in self.find_neighbors(current):
                 if nbor not in final_dist:
                     dist_so_far_list = dist_so_far.list()
-                    new_dist = final_dist[current][0] + self.link_weight(current, nbor)
+                    new_dist = func_new_dist(final_dist[current][0], self.link_weight(current, nbor))
                     new_hops = final_dist[current][1] + 1
                     try:
                         # This is relying on implementation details of
