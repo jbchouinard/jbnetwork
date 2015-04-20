@@ -59,9 +59,25 @@ class Network:
         del self._net[node1][node2]
         del self._net[node2][node1]
 
+    def del_node(self, node):
+        """Delete node and all links to it."""
+        del self._net[node]
+        for node2 in self._net:
+            if node in self._net[node2]:
+                del self._net[node2][node]
+
     def link_weight(self, node1, node2):
         return self._net[node1][node2]
 
+    def prune_network_random(self, prob):
+        for node in self.nodes:
+            if random.random() > prob:
+                self.del_node(node)
+
+    def prune_network(self, nodes_to_keep):
+        for node in self.nodes:
+            if not node in nodes_to_keep:
+                self.del_node(node)
     def find_neighbors(self, node):
         """Return list of neighbors of node."""
         return [neighbor for neighbor in self._net[node]]
@@ -216,11 +232,11 @@ class Network:
 
         return final_dist
 
-    def map_weighted_distances(self):
-        """
-        Map shortest weighted paths between all pairs of nodes using Floyd-Warshall algorithm.
-        """
-        pass
+    # def map_weighted_distances(self):
+    #     """
+    #     Map shortest weighted paths between all pairs of nodes using Floyd-Warshall algorithm.
+    #     """
+    #     pass
 
     # def estimate_node_cc(self, node):
     #     pass
