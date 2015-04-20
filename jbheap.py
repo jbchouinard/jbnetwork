@@ -185,6 +185,7 @@ def test2():
 
     assert heap.check_heap_property()
 
+
 if __name__ == "__main__":
     test1()
     test2()

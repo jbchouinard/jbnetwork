@@ -59,7 +59,10 @@ def map_bp_strongest_connections(str_of_connection):
         conn = str_of_connection[node][strongest]
         map_strongest.append((node, strongest, conn))
 
-    return map_strongestdef find_diff_paths(network, nodes_to_check):
+    return map_strongest
+
+
+def find_diff_paths(network, nodes_to_check):
     # Find # of nodes for which the shortest weighted path
     # is not the same as the shortest path by number of hops
     diffpaths = 0
@@ -77,3 +80,66 @@ def map_bp_strongest_connections(str_of_connection):
                     diffpaths += 1.0
 
     return diffpaths
+
+
+def test_diffpaths():
+    edges = [
+        ('a', 'b', 10),
+        ('a', 'd', 1),
+        ('b', 'c', 1),
+        ('b', 'd', 4),
+        ('b', 'f', 5),
+        ('c', 'd', 20),
+        ('c', 'e', 1),
+        ('e', 'f', 1),
+        ('e', 'g', 1)]
+
+    test_net = jbn.Network()
+
+    for edge in edges:
+        test_net.add_link(edge[0], edge[1], weight=edge[2])
+
+    diffpaths = find_diff_paths(test_net, ('a', 'b', 'c'))
+    assert diffpaths == 7.0
+
+
+def test_bp_str():
+    # nodes_left = ('a', 'b', 'c')
+    # nodes_right = ('D', 'E', 'F', 'G')
+
+    # edges = [
+    #   ('a' ,'D'),
+    #   ('a' ,'E'),
+    #   ('a' ,'G'),
+    #   ('b' ,'E'),
+    #   ('b' ,'F'),
+    #   ('c' ,'D'),
+    #   ('c' ,'E'),
+    #   ('c' ,'F'),
+    #   ('c' ,'G')]
+
+    # for edge in edges:
+    #   test_net.add_link(edge[0], edge[1])
+
+    # Same network defined above, as tsv
+    test_net, nodes_left, nodes_right = jbp.build_bp_network_from_csv('test.tsv', delim='\t')
+
+    conn_str_net = jbp.map_bp_str_of_connection(test_net, nodes_right)
+    wt_test_net = jbn.Network()
+
+    for node in conn_str_net:
+        for nbor in conn_str_net[node]:
+            count = conn_str_net[node][nbor]
+            wt_test_net.add_link(node, nbor, weight=1.0/count)
+
+    assert wt_test_net.link_weight('a', 'b') == 1.0
+    assert wt_test_net.link_weight('b', 'c') == 0.5
+
+    diffpaths = find_diff_paths(wt_test_net, nodes_left)
+
+    assert diffpaths == 1.0
+
+
+if __name__ == '__main__':
+    test_diffpaths()
+    test_bp_str()
