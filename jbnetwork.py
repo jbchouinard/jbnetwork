@@ -4,7 +4,6 @@ Tools for creating and editing networks, and algorithms for computing their prop
 Classes:
 Network  -- a network of nodes
 RSTree  -- rooted spanning tree, created from a Network objects
-NetworkFactory -- generate classic networks (star, clique, erdos-renyi, etc.)
 """
 __all__ = ['Network', 'RSTree']
 
@@ -17,11 +16,24 @@ class Network:
     Methods:
     add_node -- add node to the network
     add_link -- add link between two nodes
+    del_link -- remove link between two nodes
+    del_node -- remove nodes and all links to it
+    link_weight -- get weight of link between two nodes
+    find_neighbors -- get neighbors (linked nodes) of node
+    prune_network -- prune network, keeping specified nodes
+    prune_network_random -- prune network, keeping random nodes
+    map_distance_to_node -- map lengths of shortest paths to a node
+    map_weighted_distance_to_node -- map weights of shortest paths to a node
+    compute_node_centrality -- compute centrality (average distance) of a node
+    compute_node_cc -- compute clustering coefficient of a node
+    map_ac -- map centrality for all nodes
+    map_ac2 -- map centrality for all nodes, different implementation
 
     Properties:
     nodes -- list of nodes in the network
     node_count -- number of nodes in the network
     link_count -- number of links in the network
+    bridge_links -- links that are the only path between two components
     """
     def __init__(self, from_dict=None):
         """Create a network, optionally from a dictionary, else empty.
@@ -78,6 +90,7 @@ class Network:
         for node in self.nodes:
             if not node in nodes_to_keep:
                 self.del_node(node)
+
     def find_neighbors(self, node):
         """Return list of neighbors of node."""
         return [neighbor for neighbor in self._net[node]]
