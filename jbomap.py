@@ -1,4 +1,4 @@
-import time
+"""OrderedMap class: A mutable ordered sequence with optional labels."""
 from jbheap import KeyValueHeap
 
 
@@ -6,8 +6,8 @@ class OrderedMap(object):
 	"""A mutable ordered sequence with optional labels.
 	Labels can be any hashable value and must be unique.
 
-	Note that if integers are used as keys, accessing
-	by key will not work, since omap[i] where i is an int
+	Note that if integers are used as labels, accessing
+	by label will not work, since omap[i] where i is an int
 	accesses by (positional) index.
 
 	Methods

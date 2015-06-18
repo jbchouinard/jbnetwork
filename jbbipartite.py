@@ -1,3 +1,4 @@
+"""Functions to construct and compute properties of bipartite networks."""
 import csv
 
 import jbnetwork as jbnet

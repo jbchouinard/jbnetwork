@@ -3,7 +3,7 @@ Tools for creating and editing networks, and algorithms for computing their prop
 
 Classes:
 Network  -- a network of nodes
-RSTree  -- rooted spanning tree, created from a Network objects
+RSTree  -- rooted spanning tree, created from a Network object
 """
 __all__ = ['Network', 'RSTree']
 
@@ -23,7 +23,7 @@ class Network:
     prune_network -- prune network, keeping specified nodes
     prune_network_random -- prune network, keeping random nodes
     map_distance_to_node -- map lengths of shortest paths to a node
-    map_weighted_distance_to_node -- map weights of shortest paths to a node
+    map_weighted_distance_to_node -- map weights of lightest paths to a node
     compute_node_centrality -- compute centrality (average distance) of a node
     compute_node_cc -- compute clustering coefficient of a node
     map_ac -- map centrality for all nodes
