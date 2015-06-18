@@ -131,6 +131,33 @@ class Heap:
         return True
 
 
+class KeyValueHeap(Heap):
+    """
+    A heap of tuples.
+
+    Methods inherited from Heap:
+    insert
+    pop
+    index
+    list
+    check_heap_property
+    __init__
+
+    Overriden methods:
+    is_less_than
+
+    New methods:
+    keys
+    """
+    def is_less_than(self, el1, el2):
+        return el1[0] < el2[0]
+
+    def keys(self):
+        i = 0
+        while i < len(self._heap):
+            yield self._heap[i]
+    
+
 class HeapOfTuples(Heap):
     """
     A heap of tuples.
