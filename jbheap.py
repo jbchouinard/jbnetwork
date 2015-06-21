@@ -3,6 +3,7 @@ A heap.
 
 Classes:
 Heap
+KeyValueHeap
 HeapOfTuples
 """
 class Heap:
@@ -133,7 +134,7 @@ class Heap:
 
 class KeyValueHeap(Heap):
     """
-    A heap of tuples.
+    A heap of key-value pairs.
 
     Methods inherited from Heap:
     insert
