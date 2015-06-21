@@ -156,6 +156,7 @@ class KeyValueHeap(Heap):
     def keys(self):
         i = 0
         while i < len(self._heap):
+        	i += 1
             yield self._heap[i]
     
 
